@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class CSVExport extends Controller {
+class CSVExportController extends Controller {
     /**
      * Converts the user input into a CSV file and streams the file back to the user
      */
