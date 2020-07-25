@@ -31,7 +31,7 @@
                                         <input type="text" class="form-control" v-model="rows[row_index][column.key]">
                                     </td>
                                     <td>
-                                        <button class="btn btn-outline-danger remove_row_btn" @click="remove_row(index)">
+                                        <button class="btn btn-outline-danger remove_row_btn" @click="remove_row(row_index)">
                                             <i class="far fa-trash-alt"></i>
                                             Remove row
                                         </button>

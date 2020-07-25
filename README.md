@@ -3,12 +3,11 @@ This is a small example based around a simple application where a user can inter
 
 ## Setup
 
-- `npm install && npm run watch`
+- `npm install && npm run prod`
 - `composer install`
-- `cp .env.example .env`
-- `php artisan key:generate`
-- `php artisan serve --port=8086`
-- Visit http://localhost:8086
+- `cp .env.example .env && touch ./database/database.sqlite`
+- `php artisan key:generate && php artisan migrate --seed && php artisan serve --port=8086`
+- Visit [http://localhost:8086](http://localhost:8086)
 
 
 ## Testing
