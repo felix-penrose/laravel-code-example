@@ -20,4 +20,9 @@ Route::post('logout', 'Auth\LoginController@logout')->name('logout');
 
 Route::get('/', 'HomeController@index')->name('home');
 
-Route::get('/csv-editor', 'CSVEditorController@index')->name('csv-editor');
+// only logged in users may see these routes
+Route::middleware(['auth'])->group(function() {
+
+    Route::get('/csv-editor', 'CSVEditorController@index')->name('csv-editor');
+
+});
