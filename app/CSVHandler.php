@@ -46,7 +46,13 @@ class CSVHandler extends Model
 
 
 
-
+    /**
+     * Parse the CSV data from the file sent in
+     *
+     * @param UploadedFile $file - file uploaded to the application
+     *
+     * @return array
+     */
     public function parse_csv_file(UploadedFile $file): array
     {
         $path = $file->getRealPath();

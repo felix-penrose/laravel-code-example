@@ -91,6 +91,11 @@
                             name="csv_file"
                             v-on:change="import_on_file_change"
                         >
+
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="csv_contains_headers" v-model="csv_contains_headers">
+                            <label class="custom-control-label" for="csv_contains_headers">File contains headers</label>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -131,6 +136,7 @@
                 original_columns: [],
 
                 csv_file: '',
+                csv_contains_headers: true,
             };
         },
 
@@ -314,14 +320,18 @@
             },
 
 
-
+            /**
+             * set the file in the data on change
+             */
             import_on_file_change(e) {
                 this.csv_file = e.target.files[0];
             },
 
 
 
-
+            /**
+             * handle clicking the ok button
+             */
             import_handle_ok(e) {
                 e.preventDefault();
 
@@ -329,9 +339,12 @@
             },
 
 
-
+            /**
+             * handle submission of the csv import form
+             */
             import_handle_submit() {
 
+                // set content type to upload a file
                 const config = {
                     headers: { 'content-type': 'multipart/form-data' }
                 }
@@ -339,14 +352,81 @@
                 let form_data = new FormData();
                 form_data.append('csv_file', this.csv_file);
 
+
+                // send to controller to parse
                 axios.post('/api/csv-import', form_data, config)
                 .then((response) => {
-                    console.log(response);
+                    let data = response.data;
+
+                    this.update_table_data(data);
+
+                    // manually hide modal now we're finished
+                    this.$nextTick(() => {
+                        this.$bvModal.hide('import_csv');
+                    });
                 })
                 .catch((error) => {
 
                 });
             },
+
+
+
+            /**
+             * Update the table data with the new data passed in (column headers and rows)
+             *
+             * @param {array} data - array of all columns and rows combined from the csv
+             */
+            update_table_data(data) {
+
+                let new_columns = [];
+                let rows = data;
+
+                // set column names from the first row of the csv
+                if (this.csv_contains_headers) {
+
+                    new_columns = data[0].map(v => ({key: v}));
+                    rows = data.slice(1);
+
+                } else {
+
+                    for (let i = 0; i < data[0].length; i++) {
+                        new_columns.push({ key: `column_${i + 1}` });
+                    }
+                }
+
+                this.columns = new_columns;
+                this.set_row_data(rows);
+            },
+
+
+
+            /**
+             * Map row data to the correct column names
+             *
+             * @param {array} rows - all row data to map
+             */
+            set_row_data(rows) {
+
+                let new_rows = [];
+
+                // loop through each row
+                for (let i = 0; i < rows.length; i++) {
+
+                    const row = rows[i];
+                    let new_row = {};
+
+                    // loop through each column to add the headers
+                    for (let j = 0; j < row.length; j++) {
+                        new_row[this.columns[j].key] = row[j];
+                    }
+
+                    new_rows.push(new_row);
+                }
+
+                this.rows = new_rows;
+            }
+
         },
     }
 </script>
