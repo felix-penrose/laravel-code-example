@@ -18,11 +18,11 @@ Route::post('login', 'Auth\LoginController@login');
 Route::post('logout', 'Auth\LoginController@logout')->name('logout');
 
 
-Route::get('/', 'HomeController@index')->name('home');
+Route::get('/', function() {
+    return redirect('login');
+});
 
 // only logged in users may see these routes
 Route::middleware(['auth'])->group(function() {
-
-    Route::get('/csv-editor', 'CSVEditorController@index')->name('csv-editor');
-
+    Route::get('/csv-editor', 'CSVEditor\EditorController@index')->name('csv-editor');
 });

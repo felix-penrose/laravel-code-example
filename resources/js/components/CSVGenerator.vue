@@ -46,22 +46,62 @@
                         </button>
                     </div>
 
-                    <div class="card-footer text-right">
-                        <button class="btn btn-outline-secondary reset_btn" type="button" @click="reset" v-if="data_has_changed()">
-                            <i class="fas fa-history"></i>
-                            reset
-                        </button>
+                    <div class="card-footer">
 
-                        <button class="btn btn-primary export_btn" type="button" @click="submit">
-                            <i class="fas fa-file-download"></i>
-                            Export
-                        </button>
+                        <div class="row">
+                            <div class="col col-12 col-sm-6">
+
+                                <b-button v-b-modal.import_csv variant="primary" type="button">
+                                    <i class="fas fa-file-upload"></i>
+                                    Import CSV file
+                                </b-button>
+                            </div>
+
+                            <div class="col col-12 col-sm-6 text-right">
+                                <button class="btn btn-outline-secondary reset_btn" type="button" @click="reset" v-if="data_has_changed()">
+                                    <i class="fas fa-history"></i>
+                                    reset
+                                </button>
+
+                                <button class="btn btn-primary" type="button" @click="submit">
+                                    <i class="fas fa-file-download"></i>
+                                    Export
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
+        <b-modal
+            id="import_csv"
+            title="Import CSV file into table"
+            @ok="import_handle_ok"
+        >
+            <div class="my-4">
+                <form ref="form" @submit.stop.prevent="import_handle_submit" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="csv_file">Please select CSV file to import</label>
+
+                        <input
+                            type="file"
+                            class="form-control-file"
+                            id="csv_file"
+                            name="csv_file"
+                            v-on:change="import_on_file_change"
+                        >
+
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="csv_contains_headers" v-model="csv_contains_headers">
+                            <label class="custom-control-label" for="csv_contains_headers">File contains headers</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </b-modal>
+
+    </div>
 </template>
 
 <script>
@@ -94,6 +134,9 @@
 
                 original_data: [],
                 original_columns: [],
+
+                csv_file: '',
+                csv_contains_headers: true,
             };
         },
 
@@ -274,21 +317,116 @@
                 link.setAttribute('download', 'csv-export.csv');
                 document.body.appendChild(link);
                 link.click();
+            },
+
+
+            /**
+             * set the file in the data on change
+             */
+            import_on_file_change(e) {
+                this.csv_file = e.target.files[0];
+            },
+
+
+
+            /**
+             * handle clicking the ok button
+             */
+            import_handle_ok(e) {
+                e.preventDefault();
+
+                this.import_handle_submit();
+            },
+
+
+            /**
+             * handle submission of the csv import form
+             */
+            import_handle_submit() {
+
+                // set content type to upload a file
+                const config = {
+                    headers: { 'content-type': 'multipart/form-data' }
+                }
+
+                let form_data = new FormData();
+                form_data.append('csv_file', this.csv_file);
+
+
+                // send to controller to parse
+                axios.post('/api/csv-import', form_data, config)
+                .then((response) => {
+                    let data = response.data;
+
+                    this.update_table_data(data);
+
+                    // manually hide modal now we're finished
+                    this.$nextTick(() => {
+                        this.$bvModal.hide('import_csv');
+                    });
+                })
+                .catch((error) => {
+
+                });
+            },
+
+
+
+            /**
+             * Update the table data with the new data passed in (column headers and rows)
+             *
+             * @param {array} data - array of all columns and rows combined from the csv
+             */
+            update_table_data(data) {
+
+                let new_columns = [];
+                let rows = data;
+
+                // set column names from the first row of the csv
+                if (this.csv_contains_headers) {
+
+                    new_columns = data[0].map(v => ({key: v}));
+                    rows = data.slice(1);
+
+                } else {
+
+                    for (let i = 0; i < data[0].length; i++) {
+                        new_columns.push({ key: `column_${i + 1}` });
+                    }
+                }
+
+                this.columns = new_columns;
+                this.set_row_data(rows);
+            },
+
+
+
+            /**
+             * Map row data to the correct column names
+             *
+             * @param {array} rows - all row data to map
+             */
+            set_row_data(rows) {
+
+                let new_rows = [];
+
+                // loop through each row
+                for (let i = 0; i < rows.length; i++) {
+
+                    const row = rows[i];
+                    let new_row = {};
+
+                    // loop through each column to add the headers
+                    for (let j = 0; j < row.length; j++) {
+                        new_row[this.columns[j].key] = row[j];
+                    }
+
+                    new_rows.push(new_row);
+                }
+
+                this.rows = new_rows;
             }
+
         },
     }
 </script>
-
-<style scoped>
-
-    .btn_icon_light {
-        filter: invert(100%) sepia(100%) saturate(2%) hue-rotate(223deg) brightness(106%) contrast(100%);
-    }
-
-    .btn_icon {
-        width: 20px;
-        position: relative;
-        top: -2px;
-    }
-
-</style>

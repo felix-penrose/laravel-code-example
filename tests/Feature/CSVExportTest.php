@@ -20,7 +20,7 @@ class CSVExportTest extends TestCase
 
 
     /** @test */
-    public function successful_response()
+    public function valid_post_has_successful_response()
     {
         $response = $this->postJson($this->test_path, $this->test_data);
         $response->assertOK();

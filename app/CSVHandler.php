@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Model;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class CSVGenerator extends Model
+class CSVHandler extends Model
 {
     /**
      * generate csv streamed response from given array
@@ -40,5 +41,22 @@ class CSVGenerator extends Model
             'Content-Type'        => 'text/csv',
             'Content-Disposition' => 'attachment; filename="' . $title . '"',
         ]);
+    }
+
+
+
+
+    /**
+     * Parse the CSV data from the file sent in
+     *
+     * @param UploadedFile $file - file uploaded to the application
+     *
+     * @return array
+     */
+    public function parse_csv_file(UploadedFile $file): array
+    {
+        $path = $file->getRealPath();
+
+        return array_map('str_getcsv', file($path));
     }
 }

@@ -14,4 +14,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('csv-export', 'CSVExportController@convert');
+Route::post('csv-export', 'CSVEditor\ExportController@convert');
+
+Route::post('csv-import', 'CSVEditor\ImportController@import');
