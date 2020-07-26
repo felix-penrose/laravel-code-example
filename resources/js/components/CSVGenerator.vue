@@ -46,22 +46,57 @@
                         </button>
                     </div>
 
-                    <div class="card-footer text-right">
-                        <button class="btn btn-outline-secondary reset_btn" type="button" @click="reset" v-if="data_has_changed()">
-                            <i class="fas fa-history"></i>
-                            reset
-                        </button>
+                    <div class="card-footer">
 
-                        <button class="btn btn-primary export_btn" type="button" @click="submit">
-                            <i class="fas fa-file-download"></i>
-                            Export
-                        </button>
+                        <div class="row">
+                            <div class="col col-12 col-sm-6">
+
+                                <b-button v-b-modal.import_csv variant="primary" type="button">
+                                    <i class="fas fa-file-upload"></i>
+                                    Import CSV file
+                                </b-button>
+                            </div>
+
+                            <div class="col col-12 col-sm-6 text-right">
+                                <button class="btn btn-outline-secondary reset_btn" type="button" @click="reset" v-if="data_has_changed()">
+                                    <i class="fas fa-history"></i>
+                                    reset
+                                </button>
+
+                                <button class="btn btn-primary" type="button" @click="submit">
+                                    <i class="fas fa-file-download"></i>
+                                    Export
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
+        <b-modal
+            id="import_csv"
+            title="Import CSV file into table"
+            @ok="import_handle_ok"
+        >
+            <div class="my-4">
+                <form ref="form" @submit.stop.prevent="import_handle_submit" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="csv_file">Please select CSV file to import</label>
+
+                        <input
+                            type="file"
+                            class="form-control-file"
+                            id="csv_file"
+                            name="csv_file"
+                            v-on:change="import_on_file_change"
+                        >
+                    </div>
+                </form>
+            </div>
+        </b-modal>
+
+    </div>
 </template>
 
 <script>
@@ -94,6 +129,8 @@
 
                 original_data: [],
                 original_columns: [],
+
+                csv_file: '',
             };
         },
 
@@ -274,21 +311,42 @@
                 link.setAttribute('download', 'csv-export.csv');
                 document.body.appendChild(link);
                 link.click();
-            }
+            },
+
+
+
+            import_on_file_change(e) {
+                this.csv_file = e.target.files[0];
+            },
+
+
+
+
+            import_handle_ok(e) {
+                e.preventDefault();
+
+                this.import_handle_submit();
+            },
+
+
+
+            import_handle_submit() {
+
+                const config = {
+                    headers: { 'content-type': 'multipart/form-data' }
+                }
+
+                let form_data = new FormData();
+                form_data.append('csv_file', this.csv_file);
+
+                axios.post('/api/csv-import', form_data, config)
+                .then((response) => {
+                    console.log(response);
+                })
+                .catch((error) => {
+
+                });
+            },
         },
     }
 </script>
-
-<style scoped>
-
-    .btn_icon_light {
-        filter: invert(100%) sepia(100%) saturate(2%) hue-rotate(223deg) brightness(106%) contrast(100%);
-    }
-
-    .btn_icon {
-        width: 20px;
-        position: relative;
-        top: -2px;
-    }
-
-</style>
