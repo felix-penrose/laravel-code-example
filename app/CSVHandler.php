@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Model;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CSVHandler extends Model
@@ -46,8 +47,10 @@ class CSVHandler extends Model
 
 
 
-    public function import() {
+    public function parse_csv_file(UploadedFile $file): array
+    {
+        $path = $file->getRealPath();
 
-        return [];
+        return array_map('str_getcsv', file($path));
     }
 }
