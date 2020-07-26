@@ -41,4 +41,13 @@ class CSVHandler extends Model
             'Content-Disposition' => 'attachment; filename="' . $title . '"',
         ]);
     }
+
+
+
+
+
+    public function import() {
+
+        return [];
+    }
 }
