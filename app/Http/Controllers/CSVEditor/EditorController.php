@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+declare(strict_types=1);
+
+namespace App\Http\Controllers\CSVEditor;
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
-class CSVEditorController extends Controller
+class EditorController extends Controller
 {
     /**
      * Show the application dashboard.
