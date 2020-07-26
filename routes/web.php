@@ -23,6 +23,6 @@ Route::get('/', 'HomeController@index')->name('home');
 // only logged in users may see these routes
 Route::middleware(['auth'])->group(function() {
 
-    Route::get('/csv-editor', 'CSVEditorController@index')->name('csv-editor');
+    Route::get('/csv-editor', 'CSVEditor\EditorController@index')->name('csv-editor');
 
 });

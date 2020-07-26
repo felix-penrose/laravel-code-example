@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class CSVGenerator extends Model
+class CSVHandler extends Model
 {
     /**
      * generate csv streamed response from given array
